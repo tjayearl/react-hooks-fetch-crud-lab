@@ -1,29 +1,36 @@
 import React from "react";
 
 function QuestionItem({ question, onDeleteQuestion, onUpdateQuestion }) {
-  // Handle changing the answer in the dropdown
-  const handleAnswerChange = (event) => {
+  const { id, prompt, answers, correctIndex } = question;
+
+  function handleDelete() {
+    onDeleteQuestion(id); // Call the delete function passed via props
+  }
+
+  function handleChangeAnswer(event) {
     const updatedQuestion = {
       ...question,
-      correctIndex: parseInt(event.target.value),
+      correctIndex: parseInt(event.target.value),  // Update the correct answer index
     };
     onUpdateQuestion(updatedQuestion);
-  };
+  }
 
   return (
     <li>
-      <h3>{question.prompt}</h3>
-      <select
-        value={question.correctIndex}
-        onChange={handleAnswerChange}
-      >
-        {question.answers.map((answer, index) => (
+      <p>{prompt}</p>
+      <ul>
+        {answers.map((answer, index) => (
+          <li key={index}>{answer}</li>
+        ))}
+      </ul>
+      <select value={correctIndex} onChange={handleChangeAnswer}>
+        {answers.map((answer, index) => (
           <option key={index} value={index}>
             {answer}
           </option>
         ))}
       </select>
-      <button onClick={() => onDeleteQuestion(question.id)}>Delete</button>
+      <button onClick={handleDelete}>Delete</button>
     </li>
   );
 }

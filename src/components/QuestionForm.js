@@ -10,13 +10,11 @@ function QuestionForm({ onAddQuestion }) {
     correctIndex: "0", // keep it as string for select input
   });
 
-  // Handle input changes
   function handleChange(event) {
     const { name, value } = event.target;
     setFormData({ ...formData, [name]: value });
   }
 
-  // Handle form submission
   function handleSubmit(event) {
     event.preventDefault();
 

@@ -4,7 +4,6 @@ import QuestionItem from "./QuestionItem";
 function QuestionList() {
   const [questions, setQuestions] = useState([]);
 
-  // Fetch questions from the API
   useEffect(() => {
     fetch("http://localhost:4000/questions")
       .then((res) => res.json())
@@ -12,13 +11,17 @@ function QuestionList() {
       .catch((error) => console.error("Fetch error:", error));
   }, []);
 
-  // Handle deleting a question
   function handleDelete(id) {
-    const updatedQuestions = questions.filter((q) => q.id !== id);
-    setQuestions(updatedQuestions);
+    fetch(`http://localhost:4000/questions/${id}`, {
+      method: "DELETE",  // Ensure we're making a DELETE request to the server
+    })
+      .then((res) => res.json())
+      .then(() => {
+        const updatedQuestions = questions.filter((q) => q.id !== id);
+        setQuestions(updatedQuestions);
+      });
   }
 
-  // Handle updating a question
   function handleUpdate(updatedQuestion) {
     const updatedQuestions = questions.map((q) =>
       q.id === updatedQuestion.id ? updatedQuestion : q
