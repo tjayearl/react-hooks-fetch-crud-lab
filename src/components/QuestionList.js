@@ -4,6 +4,7 @@ import QuestionItem from "./QuestionItem";
 function QuestionList() {
   const [questions, setQuestions] = useState([]);
 
+  // Fetch questions when the component mounts
   useEffect(() => {
     fetch("http://localhost:4000/questions")
       .then((res) => res.json())
@@ -11,11 +12,13 @@ function QuestionList() {
       .catch((error) => console.error("Fetch error:", error));
   }, []);
 
+  // Delete a question
   function handleDelete(id) {
     const updatedQuestions = questions.filter((q) => q.id !== id);
     setQuestions(updatedQuestions);
   }
 
+  // Update a question (e.g., when dropdown value changes)
   function handleUpdate(updatedQuestion) {
     const updatedQuestions = questions.map((q) =>
       q.id === updatedQuestion.id ? updatedQuestion : q
@@ -23,6 +26,7 @@ function QuestionList() {
     setQuestions(updatedQuestions);
   }
 
+  // Map through questions to create QuestionItem components
   const questionItems = questions.map((question) => (
     <QuestionItem
       key={question.id}
