@@ -10,7 +10,7 @@ function QuestionForm({ onAddQuestion }) {
     correctIndex: "0", // keep it as string for select input
   });
 
-  // Handle form input changes
+  // Handle input changes
   function handleChange(event) {
     const { name, value } = event.target;
     setFormData({ ...formData, [name]: value });
@@ -20,7 +20,7 @@ function QuestionForm({ onAddQuestion }) {
   function handleSubmit(event) {
     event.preventDefault();
 
-    // Convert form data to required question structure
+    // Convert to required structure
     const newQuestion = {
       prompt: formData.prompt,
       answers: [
@@ -32,7 +32,7 @@ function QuestionForm({ onAddQuestion }) {
       correctIndex: parseInt(formData.correctIndex),
     };
 
-    // Send POST request to backend (json-server running on localhost:4000)
+    // POST to backend (json-server running on localhost:4000)
     fetch("http://localhost:4000/questions", {
       method: "POST",
       headers: {
@@ -42,8 +42,8 @@ function QuestionForm({ onAddQuestion }) {
     })
       .then((res) => res.json())
       .then((savedQuestion) => {
-        onAddQuestion(savedQuestion); // Add the new question to the parent state
-        // Reset the form fields
+        onAddQuestion(savedQuestion); // call parent function to update list
+        // Reset form
         setFormData({
           prompt: "",
           answer1: "",
