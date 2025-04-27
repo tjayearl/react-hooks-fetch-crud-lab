@@ -8,36 +8,67 @@ function App() {
   const [questions, setQuestions] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:4000/questions")
-      .then((res) => res.json())
-      .then((data) => setQuestions(data));
-  }, []);
+    if (page === "List") {
+      fetch("http://localhost:4000/questions")
+        .then((res) => res.json())
+        .then((data) => setQuestions(data))
+        .catch((err) => console.error("Error fetching questions:", err));
+    }
+  }, [page]);
 
-  function handleAddQuestion(newQuestion) {
-    setQuestions([...questions, newQuestion]);
+  function addNewQuestion(newQuestion) {
+    setQuestions((prevQuestions) => [...prevQuestions, newQuestion]);
   }
 
-  function handleDeleteQuestion(id) {
-    setQuestions(questions.filter((q) => q.id !== id));
+  function deleteQuestion(id) {
+    fetch(`http://localhost:4000/questions/${id}`, {
+      method: "DELETE",
+    })
+      .then(() => {
+        // Remove the question from the state
+        setQuestions((prevQuestions) =>
+          prevQuestions.filter((question) => question.id !== id)
+        );
+      })
+      .catch((error) => console.error("Error deleting question:", error));
   }
 
-  function handleUpdateQuestion(updatedQuestion) {
-    const updatedList = questions.map((q) =>
-      q.id === updatedQuestion.id ? updatedQuestion : q
-    );
-    setQuestions(updatedList);
+  function updateCorrectAnswer(id, newCorrectIndex) {
+    const updatedQuestion = {
+      correctIndex: newCorrectIndex,
+    };
+  
+    fetch(`http://localhost:4000/questions/${id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updatedQuestion),
+    })
+      .then((response) => response.json())
+      .then((updatedData) => {
+        // Update the question in the state with the new correctIndex
+        setQuestions((prevQuestions) =>
+          prevQuestions.map((question) =>
+            question.id === id
+              ? { ...question, correctIndex: updatedData.correctIndex }
+              : question
+          )
+        );
+      })
+      .catch((error) => console.error("Error updating question:", error));
   }
 
   return (
     <main>
       <AdminNavBar onChangePage={setPage} />
       {page === "Form" ? (
-        <QuestionForm onAddQuestion={handleAddQuestion} />
+        <QuestionForm onAddQuestion={addNewQuestion} />
       ) : (
         <QuestionList
           questions={questions}
-          onDelete={handleDeleteQuestion}
-          onUpdate={handleUpdateQuestion}
+          onDelete={deleteQuestion}
+          onUpdate={updateCorrectAnswer}
         />
       )}
     </main>
