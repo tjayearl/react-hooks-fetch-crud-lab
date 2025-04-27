@@ -1,26 +1,35 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
-function QuestionForm({ onAddQuestion }) {
+function QuestionForm(props) {
   const [formData, setFormData] = useState({
     prompt: "",
     answer1: "",
     answer2: "",
     answer3: "",
     answer4: "",
-    correctIndex: "0", // keep it as string for select input
+    correctIndex: 0,
   });
 
-  // Handle form input changes
+  // Use a ref to track whether the component is mounted
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
   function handleChange(event) {
-    const { name, value } = event.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData({
+      ...formData,
+      [event.target.name]: event.target.value,
+    });
   }
 
-  // Handle form submission
   function handleSubmit(event) {
     event.preventDefault();
 
-    // Convert form data to required question structure
     const newQuestion = {
       prompt: formData.prompt,
       answers: [
@@ -32,7 +41,6 @@ function QuestionForm({ onAddQuestion }) {
       correctIndex: parseInt(formData.correctIndex),
     };
 
-    // Send POST request to backend (json-server running on localhost:4000)
     fetch("http://localhost:4000/questions", {
       method: "POST",
       headers: {
@@ -40,18 +48,26 @@ function QuestionForm({ onAddQuestion }) {
       },
       body: JSON.stringify(newQuestion),
     })
-      .then((res) => res.json())
-      .then((savedQuestion) => {
-        onAddQuestion(savedQuestion); // Add the new question to the parent state
-        // Reset the form fields
-        setFormData({
-          prompt: "",
-          answer1: "",
-          answer2: "",
-          answer3: "",
-          answer4: "",
-          correctIndex: "0",
-        });
+      .then((response) => response.json())
+      .then((data) => {
+        if (isMounted.current) {
+          props.onAddQuestion(data);
+
+          // Clear form after submit
+          setFormData({
+            prompt: "",
+            answer1: "",
+            answer2: "",
+            answer3: "",
+            answer4: "",
+            correctIndex: 0,
+          });
+        }
+      })
+      .catch((err) => {
+        if (isMounted.current) {
+          console.error("Failed to submit new question:", err);
+        }
       });
   }
 
@@ -111,10 +127,10 @@ function QuestionForm({ onAddQuestion }) {
             value={formData.correctIndex}
             onChange={handleChange}
           >
-            <option value="0">{formData.answer1 || "Answer 1"}</option>
-            <option value="1">{formData.answer2 || "Answer 2"}</option>
-            <option value="2">{formData.answer3 || "Answer 3"}</option>
-            <option value="3">{formData.answer4 || "Answer 4"}</option>
+            <option value="0">{formData.answer1}</option>
+            <option value="1">{formData.answer2}</option>
+            <option value="2">{formData.answer3}</option>
+            <option value="3">{formData.answer4}</option>
           </select>
         </label>
         <button type="submit">Add Question</button>
